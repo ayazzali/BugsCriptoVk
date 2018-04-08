@@ -14,8 +14,21 @@ import {
   TextInput,
 } from 'react-native';
 import { StackNavigator } from 'react-navigation'; // 1.5.9
-const AESRecognizingFirstSymbols="encryptedAAA";
-const AESRFS=AESRecognizingFirstSymbols;
+const AESRecognizingFirstSymbols = "encryptedAAA";
+const AESRFS = AESRecognizingFirstSymbols;
+import 'crypto-js'
+debugger;
+var CryptoJS = require("crypto-js");
+
+// // Encrypt
+// var ciphertext = CryptoJS.AES.encrypt('my message', 'secret key 123');
+// ciphertext.ciphertext
+// // Decrypt
+// var bytes = CryptoJS.AES.decrypt(ciphertext.toString(), 'secret key 123');
+// var plaintext = bytes.toString(CryptoJS.enc.Utf8);
+//console.log(plaintext);
+
+debugger;
 function URLToArray(url, adv) {
   var request = {};
   var pairs;
@@ -36,7 +49,7 @@ class Login extends Component {
     //l(e)
     let arr = URLToArray(e.url, '#');
     if (arr['access_token']) {
-      l("token"+arr['access_token']?"good":"dont exists")
+      l("token" + arr['access_token'] ? "good" : "dont exists")
       //console.log(arr['access_token']);
       AsyncStorage.setItem('access_token', arr['access_token']);
       this.props.navigation.navigate('_CategoriesList');
@@ -61,7 +74,7 @@ const l = v => {
 ///login and fetch.json() and replaces: [access_token]
 function tokenAndFetch(url, navigation) {
   //AsyncStorage.removeItem('access_token',undefined)
- // l("deleted"
+  // l("deleted"
   return AsyncStorage.getItem('access_token')
     .then(access_token => {
       //debugger;
@@ -75,14 +88,16 @@ function tokenAndFetch(url, navigation) {
       console.error(e);
       debugger;
     })
-    .then(resp => resp.json())
+    .then(resp => {
+      if(resp)//if above never returned smth
+        return resp.json()})
     .catch(e => {
       console.error(e);
       debugger;
     })
     .then(json => {
       //debugger;
-      if (json.error) {
+      if (json&&json.error) {
         navigation.navigate('_Login');
         l('ERROR: resp.json()');
         //l(JSON.stringify(json));
@@ -136,28 +151,42 @@ class CategoryButton extends React.Component {
       access_token: ['Загрузка...'],
       messages: ['Загрузка...'],
       msg: '',
-      aesKey: 'q]w[ep',//todo!
+      aesKey: 'q]w[ep',
     });
-    l();
+    (async () => {
+      l("from storage aesKey")
+      aesKey = await AsyncStorage.getItem(this.props.navigation.getParam('user_id', '')+"aesKey")
+      l("from storage aesKey" + aesKey)
+      this.setState({ aesKey: aesKey == null ? 'q]w[ep' : aesKey, })//todo!
+    })()
     tokenAndFetch(
       'https://api.vk.com/method/messages.getHistory?v=5.52&user_id=' +
-        this.props.navigation.getParam('user_id', '') +
-        '&access_token=[access_token]',
+      this.props.navigation.getParam('user_id', '') +
+      '&access_token=[access_token]',
       this.props.navigation
     ).then(json => {
       // l(json);
       l('+ getHistory:');
-      let messages = json.response.items.map(val=>{
-        if(val&&val.body&&val.body.startsWith(AESRFS)){
-          l("decrypting: "+val.body)
-          
+      let messages = json.response.items.map(val => {
+        if (val && val.body && val.body.startsWith(AESRFS)) {
+
+          l("decrypting: " + val.body.substr(AESRFS.length, val.body.length - 1))
+          var bytes = CryptoJS.AES.decrypt(val.body.substr(AESRFS.length, val.body.length - 1), this.state.aesKey);
+          try {
+            var plaintext = bytes.toString(CryptoJS.enc.Utf8);
+            val.body = plaintext;
+          } catch (e) {
+            console.error("toStringing")
+            l(bytes)
+            val.body = "(что-то пошло не так)"
+          }
         }
         return val;
       });///.map(el => el.message);
       l(' count=' + messages.length);
       this.setState({ messages: messages });
     }).catch(e => {
-      console.error("getHistory: "+e);
+      console.error("getHistory: " + e);
       debugger;
     });
   }
@@ -166,29 +195,37 @@ class CategoryButton extends React.Component {
     const list = this.state.messages.map((val, id) => (
       <Button
         key={id}
-        title={val&&val.body ? val.body : '0'} //
-        onPress={() => {} //this.props.navigation.navigate('_Messages', {user_id:val.user_id})
+        title={val && val.body ? val.body : '0'} //
+        onPress={() => { } //this.props.navigation.navigate('_Messages', {user_id:val.user_id})
         }
       />
     ));
     return (
       <ScrollView style={styles.FlexStyle}>
         {list}
-        <TextInput 
+        <TextInput
           value={this.state.aesKey}
-          onChangeText={value => this.setState({aesKey: value })} />
-        <TextInput onChangeText={value => this.setState({msg: value })} />
+          onChangeText={value => {
+            l("changing aesKey")
+            AsyncStorage.setItem(this.props.navigation.getParam('user_id', '')+"aesKey", value)
+            this.setState({ aesKey: value })
+          }} />
+        <TextInput onChangeText={value => this.setState({ msg: value })} />
         <TouchableOpacity
-          onPress={() =>{
+          onPress={() => {
             l('encripting');
-            let encripted=this.state.msg//do bool enc or no
-            encripted=AESRFS+encripted
+            // Encrypt
+            var ciphertext = CryptoJS.AES.encrypt(this.state.msg, this.state.aesKey);
+            l(ciphertext.ciphertext)
+            let encripted = ciphertext.toString()//do bool enc or no
+            encripted = AESRFS + encripted
             tokenAndFetch(
               'https://api.vk.com/method/messages.send?v=5.52&user_id=' +
-                this.props.navigation.getParam('user_id', '') +
-                '&access_token=[access_token]&message=' +
-                encripted
-            )}}>
+              this.props.navigation.getParam('user_id', '') +
+              '&access_token=[access_token]&message=' +
+              encripted
+            )
+          }}>
           <Text>
             Send
           </Text>
