@@ -4,7 +4,7 @@ import {
   AsyncStorage,
   WebView,
   //AppRegistry,
-  //View,
+  View,
   ScrollView,
   //ListView,
   StyleSheet,
@@ -19,6 +19,8 @@ const AESRFS = AESRecognizingFirstSymbols;
 import 'crypto-js'
 debugger;
 var CryptoJS = require("crypto-js");
+
+import { Row, Column as Col, Grid} from 'react-native-responsive-grid'
 
 // // Encrypt
 // var ciphertext = CryptoJS.AES.encrypt('my message', 'secret key 123');
@@ -201,36 +203,52 @@ class CategoryButton extends React.Component {
       />
     ));
     return (
-      <ScrollView style={styles.FlexStyle}>
-        {list}
-        <TextInput
-          value={this.state.aesKey}
-          onChangeText={value => {
-            l("changing aesKey")
-            AsyncStorage.setItem(this.props.navigation.getParam('user_id', '')+"aesKey", value)
-            this.setState({ aesKey: value })
-          }} />
-        <TextInput onChangeText={value => this.setState({ msg: value })} />
-        <TouchableOpacity
-          onPress={() => {
-            l('encripting');
-            // Encrypt
-            var ciphertext = CryptoJS.AES.encrypt(this.state.msg, this.state.aesKey);
-            l(ciphertext.ciphertext)
-            let encripted = ciphertext.toString()//do bool enc or no
-            encripted = AESRFS + encripted
-            tokenAndFetch(
-              'https://api.vk.com/method/messages.send?v=5.52&user_id=' +
-              this.props.navigation.getParam('user_id', '') +
-              '&access_token=[access_token]&message=' +
-              encripted
-            )
-          }}>
-          <Text>
-            Send
-          </Text>
-        </TouchableOpacity>
-      </ScrollView>
+	<View style={styles.Main}>
+		<ScrollView style={styles.FlexStyle}>
+		{list}
+		</ScrollView>
+		<View>
+			<View>
+				<TextInput
+				  value={this.state.aesKey}
+				  onChangeText={value => {
+					l("changing aesKey")
+					AsyncStorage.setItem(this.props.navigation.getParam('user_id', '')+"aesKey", value)
+					this.setState({ aesKey: value })
+				  }} />
+			</View>
+			<Row>
+				<Col size={80}>
+					<View>
+						<TextInput onChangeText={value => this.setState({ msg: value })} />
+					</View>
+				</Col>
+				<Col size={20} >
+				<View>
+					<TouchableOpacity
+					  onPress={() => {
+						l('encripting');
+						// Encrypt
+						var ciphertext = CryptoJS.AES.encrypt(this.state.msg, this.state.aesKey);
+						l(ciphertext.ciphertext)
+						let encripted = ciphertext.toString()//do bool enc or no
+						encripted = AESRFS + encripted
+						tokenAndFetch(
+						  'https://api.vk.com/method/messages.send?v=5.52&user_id=' +
+						  this.props.navigation.getParam('user_id', '') +
+						  '&access_token=[access_token]&message=' +
+						  encripted
+						)
+					  }}>
+					<Text style={styles.Buttonsend}>
+						Send
+					</Text>
+					</TouchableOpacity>
+				</View>
+				</Col>
+			</Row>
+		</View>
+	</View>
     );
   }
 }
@@ -238,6 +256,24 @@ class CategoryButton extends React.Component {
 const styles = StyleSheet.create({
   FlexStyle: {
     flex: 1,
+	alignSelf: 'stretch'
+  },
+  Main: {
+		flex: 1, 
+		flexDirection: 'column', 
+		justifyContent: 'center', 
+		alignItems: 'center',
+		flexWrap: 'wrap'
+  },
+  Inputcontainer: {
+		flex: 1, 
+		flexDirection: 'row', 
+		justifyContent: 'flex-start', 
+		flexWrap: 'wrap',
+		height: 80
+  },
+  Buttonsend: {
+		
   },
   ColorRed: {
     backgroundColor: 'red',
