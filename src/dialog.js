@@ -79,16 +79,19 @@ export class Dialog extends React.Component {
       let messages = json.response.items.map(val => {
         if (val && val.body && val.body.startsWith(AESRFS)) {
           let pureMsg = val.body.substr(AESRFS.length, val.body.length - 1)
+          pureMsg=pureMsg.split(' ').join("+")
+          //pureMsg=decodeURI(pureMsg);
           l("decrypting: " + pureMsg)
 
           var bytes = CryptoJS.AES.decrypt(pureMsg, this.state.aesKey);
           l(bytes)
+          debugger;
           try {
             var plaintext = bytes.toString(CryptoJS.enc.Utf8);
-            if (plaintext = 0)
+            if (plaintext == '0')
               val.body = pureMsg
             else
-              val.body = encodeURI(plaintext);// todo check!
+              val.body = plaintext;
 
           } catch (e) {
             console.error("toStringing")
@@ -151,7 +154,7 @@ export class Dialog extends React.Component {
                       'https://api.vk.com/method/messages.send?v=5.52&user_id=' +
                       this.props.navigation.getParam('user_id', '') +
                       '&access_token=[access_token]&message=' +
-                      encripted
+                      encripted// todo encodeURI doesnt work for + CHECK!
                     )
                   }}>
                   <Text style={styles.Buttonsend}>
