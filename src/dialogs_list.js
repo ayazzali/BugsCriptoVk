@@ -26,11 +26,15 @@ import {l, tokenAndFetch} from './utils'
 import {Dialog} from './dialog'
 
 export class DialogsList extends React.Component {
-    componentWillMount() {
-      this.setState({
-        access_token: ['Загрузка...'],
-        dialogs: ['Загрузка...'],
-      });
+  constructor(p){
+    super(p);
+   this.state={
+      access_token: ['Загрузка...'],
+      dialogs: ['Загрузка...'],
+    };
+  }
+  componentDidMount() {
+    debugger
       tokenAndFetch(
         'https://api.vk.com/method/messages.getDialogs?v=5.52&access_token=[access_token]',
         this.props.navigation
