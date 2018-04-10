@@ -16,7 +16,17 @@ import {
 import { StackNavigator } from 'react-navigation'; // 1.5.9
 import { Row, Column as Col, Grid} from 'react-native-responsive-grid'
 //import 'crypto-js'
-//var CryptoJS = require("crypto-js");
+var CryptoJS = require("crypto-js");
+var ciphertext = CryptoJS.AES.encrypt('my message', 'secret key 123');
+//ciphertext.ciphertext
+// // Encrypt
+// Decrypt
+var bytes = CryptoJS.AES.decrypt(ciphertext.toString(), 'secret key 123');
+var plaintext = bytes.toString(CryptoJS.enc.Utf8);
+console.log(plaintext);
+debugger;
+
+
 var RSAKey = require('react-native-rsa');
 
 import {Login} from './src/login'
@@ -50,12 +60,12 @@ var encrypted = rsa.encrypt(originText);
 rsa.setPrivateString(privateKey);
 var decrypted = rsa.decrypt(encrypted); // decrypted == originText
 
-l(decrypted)
-tokenAndFetch('https://api.vk.com/method/storage.set?v=5.52&access_token=[access_token]'+
-'global=1&&key=rsaopen&&value='+encodeURI(publicKey), null)//+'user_id
-.then(json=>
-console.info)
-.catch(e => {console.error("storage.set: " + e);debugger;});
+// l(decrypted)
+// tokenAndFetch('https://api.vk.com/method/storage.set?v=5.52&access_token=[access_token]'+
+// 'global=1&&key=rsaopen&&value='+encodeURI(publicKey), null)//+'user_id
+// .then(json=>
+// console.info)
+// .catch(e => {console.error("storage.set: " + e);debugger;});
 
 
 
