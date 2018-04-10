@@ -79,7 +79,7 @@ export class Dialog extends React.Component {
       let messages = json.response.items.map(val => {
         if (val && val.body && val.body.startsWith(AESRFS)) {
           let pureMsg = val.body.substr(AESRFS.length, val.body.length - 1)
-          pureMsg=pureMsg.split(' ').join("+")
+          pureMsg = pureMsg.split(' ').join("+")
           //pureMsg=decodeURI(pureMsg);
           l("decrypting: " + pureMsg)
 
@@ -111,12 +111,11 @@ export class Dialog extends React.Component {
   render() {
     //l(this.state.messages);
     const list = this.state.messages.map((val, id) => (
-      <Button
-        key={id}
-        title={val && val.body ? val.body : '0'} //
-        onPress={() => { } //this.props.navigation.navigate('_Messages', {user_id:val.user_id})
-        }
-      />
+      <View key={id}>
+        <TouchableHighlight>
+          <Text  style={val.from_id == this.props.navigation.getParam("user_id", '') ? styles.Left : styles.Right}>{val && val.body ? val.body : '0'} </Text>
+        </TouchableHighlight>
+      </View>
     ));
     return (
       <View style={styles.Main}>
@@ -126,6 +125,7 @@ export class Dialog extends React.Component {
         <View>
           <View>
             <TextInput
+              placeholder={"Ваш \"пароль\". Передайте его собеседнику!"}// т.к. в интернете всё можно перехватить"}
               value={this.state.aesKey}
               onChangeText={value => {
                 l("changing aesKey")
@@ -136,12 +136,12 @@ export class Dialog extends React.Component {
           <Row>
             <Col size={80}>
               <View>
-                <TextInput onChangeText={value => this.setState({ msg: value })} />
+                <TextInput onChangeText={value => this.setState({ msg: value })} placeholder={"Ваше сообщение ..."} />
               </View>
             </Col>
-            <Col size={20} >
+            <Col size={20}>
               <View>
-                <TouchableOpacity
+                <Button
                   onPress={() => {
                     l('encripting');
                     // Encrypt Encrypt Encrypt Encrypt Encrypt Encrypt Encrypt
@@ -156,11 +156,9 @@ export class Dialog extends React.Component {
                       '&access_token=[access_token]&message=' +
                       encripted// todo encodeURI doesnt work for + CHECK!
                     )
-                  }}>
-                  <Text style={styles.Buttonsend}>
-                    Send
-                      </Text>
-                </TouchableOpacity>
+                  }}
+                  style={styles.Buttonsend}
+                  title={"Send"} />
               </View>
             </Col>
           </Row>
@@ -171,6 +169,12 @@ export class Dialog extends React.Component {
 }
 
 const styles = StyleSheet.create({
+  Right: {
+    textAlign: 'right', alignSelf: 'stretch'
+  },
+  Left: {
+    textAlign: 'left', alignSelf: 'stretch'
+  },
   FlexStyle: {
     flex: 1,
     alignSelf: 'stretch'
