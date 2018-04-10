@@ -74,6 +74,7 @@ export class Dialog extends React.Component {
       this.props.navigation
     ).then(json => {
       // l(json);
+      //decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt
       l('+ getHistory:');
       let messages = json.response.items.map(val => {
         if (val && val.body && val.body.startsWith(AESRFS)) {
@@ -140,7 +141,7 @@ export class Dialog extends React.Component {
                 <TouchableOpacity
                   onPress={() => {
                     l('encripting');
-                    // Encrypt
+                    // Encrypt Encrypt Encrypt Encrypt Encrypt Encrypt Encrypt
                     var ciphertext = CryptoJS.AES.encrypt(this.state.msg, this.state.aesKey);
                     l(ciphertext.ciphertext)
                     let encripted = ciphertext.toString()//do bool enc or no
