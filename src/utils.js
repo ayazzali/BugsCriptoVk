@@ -8,22 +8,24 @@ export const l = v => {
   };
   
 /// login and fetch.json() and replaces: [access_token]
-export function tokenAndFetch(url, navigation) {
+export  function tokenAndFetch(url, navigation) {
   //AsyncStorage.removeItem('access_token',undefined)
   // l("deleted"
-  return AsyncStorage.getItem('access_token')
-    .then(access_token => {
+  // return AsyncStorage.getItem('access_token')
+  //   .then(access_token => {
+    return (async()=>{
+    var access_token=await  AsyncStorage.getItem('access_token')
       //debugger;
       url = url.replace('[access_token]', access_token);
       l('tokenAndFetch starts:')
       //l(url)
       if (!access_token) navigation.navigate('_Login');
-      else return fetch(url);
-    })
-    .catch(e => {
-      console.error(e);
-      debugger;
-    })
+      else return fetch(url)
+    // })
+    // .catch(e => {
+    //   console.error(e);
+    //   debugger;
+    // })
     .then(resp => {
       if(resp)//if above never returned smth
         return resp.json()})
@@ -47,4 +49,4 @@ export function tokenAndFetch(url, navigation) {
       console.warn(e);
       debugger;
     });
-}
+})()}
