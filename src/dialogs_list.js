@@ -22,7 +22,7 @@ import { Row, Column as Col, Grid} from 'react-native-responsive-grid'
 var RSAKey = require('react-native-rsa');
 
 import {Login} from './login'
-import {l, tokenAndFetch} from './utils'
+import {l, tokenAndFetch, longPoll} from './utils'
 import {Dialog} from './dialog'
 
 export class DialogsList extends React.Component {
@@ -33,8 +33,12 @@ export class DialogsList extends React.Component {
       dialogs: ['Загрузка...'],
     };
   }
+  _longPoll(newMsg){
+    // todo: 2000000000 +
+     this.setState(prv=> {return{dialogs:prv.dialogs.map(val=>val.user_id==newMsg.user_id? newMsg:val) }})    
+  }
   componentDidMount() {
-    debugger
+    longPoll(this._longPoll.bind(this))
       tokenAndFetch(
         'https://api.vk.com/method/messages.getDialogs?v=5.52&access_token=[access_token]',
         this.props.navigation
@@ -45,11 +49,11 @@ export class DialogsList extends React.Component {
     }
     render() {
       console.info('render dialogs');
-      const dialogsCopmponents = this.state.dialogs.map((val, id) => (
+      const dialogsCopmponents = this.state.dialogs.map((val,id) => (
         <Button
-          key={id}
+        key={id}//{val.user_id? val.user_id:""}// 2000000000 +
           title={val.body ? val.body : ''} //
-          onPress={() => this.props.navigation.navigate('_Dialog', { ...val })}
+          onPress={() => this.props.navigation.navigate('_Dialog', { ...val })}//users_count && null>1
         />
       ));
       return (
