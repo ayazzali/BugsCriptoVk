@@ -192,6 +192,10 @@ export class Dialog extends React.Component {
                     tokenAndFetch(
                       'https://api.vk.com/method/messages.send?v=5.52' + params +
                       '&access_token=[access_token]&message=' + encripted)
+                      .then(json => {
+                        if (json && !json.error)
+                          this.setState({ msg: '' })
+                      })
                   }}
                   style={styles.Buttonsend}
                   title={"Send"} />
