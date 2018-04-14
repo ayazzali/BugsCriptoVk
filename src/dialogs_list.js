@@ -50,6 +50,17 @@ export class DialogsList extends React.Component {
   }
   render() {
     console.info('render dialogs');
+    // deprecated
+    // this.state.dialogs.map((val, id) => {
+    //     if(val.users_count)
+    //     {
+    //       val.user_id = val.chat_id + 2000000000 // todo !!!!! chat_id not equals user_id
+    //       l(val)
+    //     }
+    //     return val
+
+    //   }
+    // )
     const dialogsCopmponents = this.state.dialogs.map((val, id) => (
       <Button
         key={id}//{val.user_id? val.user_id:""}// 2000000000 +

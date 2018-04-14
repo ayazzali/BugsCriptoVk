@@ -87,10 +87,14 @@ export class Dialog extends React.Component {
       aesKey = await AsyncStorage.getItem(this.props.navigation.getParam('user_id', '') + "aesKey")
       l("from storage aesKey" + aesKey)
       this.setState({ aesKey: aesKey == null ? 'q]w[ep' : aesKey, })//todo!
-    })()
+    })();
+
+    let chatoruserid = this.props.navigation.getParam('user_id', '');
+    if (this.props.navigation.getParam('chat_id', '') != '')
+      chatoruserid = this.props.navigation.getParam('chat_id', '') + 2000000000 // todo !!!!! chat_id not equals user_id
     tokenAndFetch(
       'https://api.vk.com/method/messages.getHistory?v=5.52&user_id=' +
-      this.props.navigation.getParam('user_id', '') +
+      chatoruserid +
       '&access_token=[access_token]',
       this.props.navigation
     ).then(json => {
@@ -177,12 +181,17 @@ export class Dialog extends React.Component {
                     let encripted = ciphertext.toString()//do bool enc or no
                     l(encripted)
                     encripted = AESRFS + encripted
+
+                    let params = '&user_id=' + this.props.navigation.getParam('user_id', '');
+                    let chat_id = this.props.navigation.getParam('chat_id', '')
+                    if (chat_id != '') {
+                      params = '&admin_id=' + this.props.navigation.getParam('admin_id', '')
+                      params = params + '&peer_id=' + (parseInt(chat_id) + 2000000000)
+                      params = params + '&chat_id=' + chat_id
+                    }
                     tokenAndFetch(
-                      'https://api.vk.com/method/messages.send?v=5.52&user_id=' +
-                      this.props.navigation.getParam('user_id', '') +
-                      '&access_token=[access_token]&message=' +
-                      encripted// todo encodeURI doesnt work for + CHECK!
-                    )
+                      'https://api.vk.com/method/messages.send?v=5.52' + params +
+                      '&access_token=[access_token]&message=' + encripted)
                   }}
                   style={styles.Buttonsend}
                   title={"Send"} />
