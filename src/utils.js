@@ -7,7 +7,9 @@ export const l = v => {
   console.log(JSON.stringify(v));
 };
 
-/// login and fetch.json() and replaces: [access_token]
+export const DisplaysName = {_Login:"_Login",_Dialog:"_Dialog",_DialogsList:"_DialogsList"}
+console.log(DisplaysName)
+
 export function tokenAndFetch(url, navigation) {
   //AsyncStorage.removeItem('access_token',undefined)
   // l("deleted"
@@ -54,7 +56,7 @@ export function tokenAndFetch(url, navigation) {
 }
 
 /// func that will be called 'by' new msg
-export function longPoll(func) {//todo ACCESS_TOKEN (..)
+export function longPoll(func,navigation,stop=false) {//todo ACCESS_TOKEN (..)
   function upd(server, key, ts) {
     return fetch("https://" + server + "?act=a_check&key=" + key + "&ts=" + ts + "&wait=25&mode=2&version=2")
       .then((rawUpdate) => {
@@ -66,12 +68,13 @@ export function longPoll(func) {//todo ACCESS_TOKEN (..)
       }).catch(console.error);
   }
 
-   tokenAndFetch("https://api.vk.com/method/messages.getLongPollServer?access_token=[access_token]&v=5.73")
+   tokenAndFetch("https://api.vk.com/method/messages.getLongPollServer?access_token=[access_token]&v=5.73",navigation)
     .then(function (lp) {
       var r = lp.response;
        (async () => {
         var ts = r.ts
         while (true) {
+          if(stop) return;
           try {
             var result = await upd(r.server, r.key, ts)
             ts = result.ts
