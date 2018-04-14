@@ -7,7 +7,7 @@ export const l = v => {
   console.log(JSON.stringify(v));
 };
 
-export const DisplaysName = {_Login:"_Login",_Dialog:"_Dialog",_DialogsList:"_DialogsList"}
+export const DisplaysName = { _Login: "_Login", _Dialog: "_Dialog", _DialogsList: "_DialogsList" }
 console.log(DisplaysName)
 
 export function tokenAndFetch(url, navigation) {
@@ -39,7 +39,9 @@ export function tokenAndFetch(url, navigation) {
       .then(json => {
         //debugger;
         if (json && json.error) {
-          navigation.navigate('_Login');
+          //if(json.error.error_code==100)
+          l(json.error.error_msg)
+          navigation.navigate('_Login'); //todo!!! check right this error code
           l('ERROR: resp.json()');
           //l(JSON.stringify(json));
           return JSON.stringify(json);
@@ -56,7 +58,7 @@ export function tokenAndFetch(url, navigation) {
 }
 
 /// func that will be called 'by' new msg
-export function longPoll(func,navigation,stop=false) {//todo ACCESS_TOKEN (..)
+export function longPoll(func, navigation, stop = false) {//todo ACCESS_TOKEN (..)
   function upd(server, key, ts) {
     return fetch("https://" + server + "?act=a_check&key=" + key + "&ts=" + ts + "&wait=25&mode=2&version=2")
       .then((rawUpdate) => {
@@ -68,13 +70,13 @@ export function longPoll(func,navigation,stop=false) {//todo ACCESS_TOKEN (..)
       }).catch(console.error);
   }
 
-   tokenAndFetch("https://api.vk.com/method/messages.getLongPollServer?access_token=[access_token]&v=5.73",navigation)
+  tokenAndFetch("https://api.vk.com/method/messages.getLongPollServer?access_token=[access_token]&v=5.73", navigation)
     .then(function (lp) {
       var r = lp.response;
-       (async () => {
+      (async () => {
         var ts = r.ts
         while (true) {
-          if(stop) return;
+          if (stop) return;
           try {
             var result = await upd(r.server, r.key, ts)
             ts = result.ts
@@ -87,8 +89,8 @@ export function longPoll(func,navigation,stop=false) {//todo ACCESS_TOKEN (..)
                   //l(element[3])//user_id
                   let text = element[5]//.split(" ").join("+")/// ибо вк видимо энкодит  //atob(element[5])
                   console.log("UpdateMsg: " + text)
-                  func({body:text,user_id:element[3]});
-                  }
+                  func({ body: text, user_id: element[3] });
+                }
               });
           } catch (e) { console.error(e) }
         }
