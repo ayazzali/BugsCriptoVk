@@ -54,7 +54,7 @@ l(decrypted)
 
 export class Dialog extends React.Component {
   constructor(p) {
-    base(p)
+    super(p)
     stop = false;
   }
   // 1 dialog:
