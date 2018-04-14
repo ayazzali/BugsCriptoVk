@@ -22,7 +22,7 @@ var RSAKey = require('react-native-rsa');
 var CryptoJS = require("crypto-js");
 
 import { Login } from './login'
-import { l, tokenAndFetch } from './utils'
+import { l, tokenAndFetch, longPoll } from './utils'
 
 const AESRecognizingFirstSymbols = "encryptedAAA";
 const AESRFS = AESRecognizingFirstSymbols;
@@ -53,7 +53,25 @@ var decrypted = rsa.decrypt(encrypted); // decrypted == originText
 l(decrypted)
 
 export class Dialog extends React.Component {
+  constructor(p) {
+    base(p)
+    stop = false;
+  }
   // 1 dialog:
+  _longPoll(newMsg) {
+    // todo: 2000000000 +
+    l("_longPoll in dialog" + newMsg)
+    if (newMsg.user_id == this.props.navigation.getParam('user_id', ''))
+      this.setState(prv => {
+        prv.messages.reverse(); prv.messages.push(newMsg); prv.messages.reverse();
+        return { messages: prv.messages }
+      })
+
+  }
+  componentWillUnmount() {
+    this.stop = true // doestn help stop _longPoll !!!!! todo !!!!
+    this._longPoll = undefined
+  }
   componentWillMount() {
     this.setState({
       access_token: ['Загрузка...'],
@@ -61,6 +79,9 @@ export class Dialog extends React.Component {
       msg: '',
       aesKey: 'q]w[ep',
     });
+
+    longPoll(this._longPoll.bind(this), this.props.navigation, this.stop);
+
     (async () => {
       l("from storage aesKey")
       aesKey = await AsyncStorage.getItem(this.props.navigation.getParam('user_id', '') + "aesKey")
@@ -74,34 +95,9 @@ export class Dialog extends React.Component {
       this.props.navigation
     ).then(json => {
       // l(json);
-      //decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt
-      l('+ getHistory:');
-      let messages = json.response.items.map(val => {
-        if (val && val.body && val.body.startsWith(AESRFS)) {
-          let pureMsg = val.body.substr(AESRFS.length, val.body.length - 1)
-          pureMsg = pureMsg.split(' ').join("+")
-          //pureMsg=decodeURI(pureMsg);
-          l("decrypting: " + pureMsg)
-
-          var bytes = CryptoJS.AES.decrypt(pureMsg, this.state.aesKey);
-          l(bytes)
-          debugger;
-          try {
-            var plaintext = bytes.toString(CryptoJS.enc.Utf8);
-            if (plaintext == '0')
-              val.body = pureMsg
-            else
-              val.body = plaintext;
-
-          } catch (e) {
-            console.error("toStringing")
-            l(bytes)
-            val.body = "(что-то пошло не так)"
-          }
-        }
-        return val;
-      });///.map(el => el.message);
-      l(' count=' + messages.length);
+      l('+ getHistory: json arrived:)');
+      //debugger;
+      let messages = json.response.items
       this.setState({ messages: messages });
     }).catch(e => {
       console.error("getHistory: " + e);
@@ -110,10 +106,41 @@ export class Dialog extends React.Component {
   }
   render() {
     //l(this.state.messages);
-    const list = this.state.messages.map((val, id) => (
+    //debugger;
+
+    //decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt decrypt
+    l('+ decrypt, render:');
+    //debugger;
+    let _messages = this.state.messages.map(val => {
+      if (val && val.body && val.body.startsWith(AESRFS)) {
+        let pureMsg = val.body.substr(AESRFS.length, val.body.length - 1)
+        pureMsg = pureMsg.split(' ').join("+")
+        //pureMsg=decodeURI(pureMsg);
+        l("decrypting: " + pureMsg)
+
+        var bytes = CryptoJS.AES.decrypt(pureMsg, this.state.aesKey);
+        l(bytes)
+        debugger;
+        try {
+          var plaintext = bytes.toString(CryptoJS.enc.Utf8);
+          if (plaintext == '0')
+            val.body = pureMsg
+          else
+            val.body = plaintext;
+
+        } catch (e) {
+          console.warn("toStringing")
+          l(bytes)
+          val.body = "(что-то пошло не так)"
+        }
+      }
+      return val;
+    });///.map(el => el.message);
+    l(' count=' + _messages.length);
+    const list = _messages.map((val, id) => (
       <View key={id}>
         <TouchableHighlight>
-          <Text  style={val.from_id == this.props.navigation.getParam("user_id", '') ? styles.Left : styles.Right}>{val && val.body ? val.body : '0'} </Text>
+          <Text style={val.from_id == this.props.navigation.getParam("user_id", '') ? styles.Left : styles.Right}>{val && val.body ? val.body : '0'} </Text>
         </TouchableHighlight>
       </View>
     ));
