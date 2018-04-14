@@ -44,7 +44,7 @@ export function tokenAndFetch(url, navigation) {
           navigation.navigate('_Login'); //todo!!! check right this error code
           l('ERROR: resp.json()');
           //l(JSON.stringify(json));
-          return JSON.stringify(json);
+          return JSON.stringify(json);//todo do proper alert: about 
         }
         return json;
         //let messages = json.response.items.map(el => el.message);
