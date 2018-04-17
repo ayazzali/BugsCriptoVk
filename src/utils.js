@@ -44,16 +44,18 @@ export function tokenAndFetch(url, navigation) {
           navigation.navigate('_Login'); //todo!!! check right this error code
           l('ERROR: resp.json()');
           //l(JSON.stringify(json));
-          return JSON.stringify(json);//todo do proper alert: about 
+          //return JSON.stringify(json);//todo do proper alert: about 
+          throw json.error
         }
         return json;
         //let messages = json.response.items.map(el => el.message);
         //this.setState({ dialogs: messages });
       })
-      .catch(e => {
-        console.warn(e);
-        debugger;
-      });
+      /// please catch in your code
+      // .catch(e => {
+      //   console.warn(e);
+      //   debugger;
+      // });
   })()
 }
 

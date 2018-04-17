@@ -46,7 +46,11 @@ export class DialogsList extends React.Component {
     ).then(json => {
       let messages = json.response.items.map(el => el.message);
       this.setState({ dialogs: messages });
-    });
+    })
+    .catch(e => {
+        console.warn(e);// todo alert
+        debugger;
+      });
   }
   render() {
     console.info('render dialogs');

@@ -77,7 +77,7 @@ export class Dialog extends React.Component {
       access_token: ['Загрузка...'],
       messages: ['Загрузка...'],
       msg: '',
-      aesKey: 'q]w[ep',
+      aesKey: '',
     });
 
     longPoll(this._longPoll.bind(this), this.props.navigation, this.stop);
@@ -86,7 +86,7 @@ export class Dialog extends React.Component {
       l("from storage aesKey")
       aesKey = await AsyncStorage.getItem(this.props.navigation.getParam('user_id', '') + "aesKey")
       l("from storage aesKey" + aesKey)
-      this.setState({ aesKey: aesKey == null ? 'q]w[ep' : aesKey, })//todo!
+      this.setState({ aesKey: aesKey /*== null ? 'q]w[ep' : aesKey,*/ })//todo!
     })();
 
     let chatoruserid = this.props.navigation.getParam('user_id', '');
@@ -121,7 +121,8 @@ export class Dialog extends React.Component {
         pureMsg = pureMsg.split(' ').join("+")
         //pureMsg=decodeURI(pureMsg);
         l("decrypting: " + pureMsg)
-
+        if (!this.state.aesKey || this.state.aesKey == '')// todo
+          return val
         var bytes = CryptoJS.AES.decrypt(pureMsg, this.state.aesKey);
         l(bytes)
         debugger;
@@ -162,12 +163,16 @@ export class Dialog extends React.Component {
                 l("changing aesKey")
                 AsyncStorage.setItem(this.props.navigation.getParam('user_id', '') + "aesKey", value)
                 this.setState({ aesKey: value })
+                //this.render()
               }} />
           </View>
           <Row>
             <Col size={80}>
               <View>
-                <TextInput onChangeText={value => this.setState({ msg: value })} placeholder={"Ваше сообщение ..."} />
+                <TextInput 
+                value={this.state.msg} 
+                onChangeText={value => this.setState({ msg: value })} 
+                placeholder={"Ваше сообщение ..."} />
               </View>
             </Col>
             <Col size={20}>
@@ -175,13 +180,16 @@ export class Dialog extends React.Component {
                 <Button
                   onPress={() => {
                     l('encripting');
-                    // Encrypt Encrypt Encrypt Encrypt Encrypt Encrypt Encrypt
-                    var ciphertext = CryptoJS.AES.encrypt(this.state.msg, this.state.aesKey);
-                    l(ciphertext.ciphertext)
-                    let encripted = ciphertext.toString()//do bool enc or no
-                    l(encripted)
-                    encripted = AESRFS + encripted
-
+                    //debugger;
+                    let encripted = this.state.msg // encriptedOrJustPlain
+                    if (this.state.aesKey && this.state.aesKey != '') {
+                      // Encrypt Encrypt Encrypt Encrypt Encrypt Encrypt Encrypt
+                      var ciphertext = CryptoJS.AES.encrypt(this.state.msg, this.state.aesKey);
+                      l(ciphertext.ciphertext)
+                      encripted = ciphertext.toString()//do bool enc or no
+                      l(encripted)
+                      encripted = AESRFS + encripted
+                    }
                     let params = '&user_id=' + this.props.navigation.getParam('user_id', '');
                     let chat_id = this.props.navigation.getParam('chat_id', '')
                     if (chat_id != '') {
@@ -189,6 +197,7 @@ export class Dialog extends React.Component {
                       params = params + '&peer_id=' + (parseInt(chat_id) + 2000000000)
                       params = params + '&chat_id=' + chat_id
                     }
+
                     tokenAndFetch(
                       'https://api.vk.com/method/messages.send?v=5.52' + params +
                       '&access_token=[access_token]&message=' + encripted)
