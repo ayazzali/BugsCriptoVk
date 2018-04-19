@@ -47,7 +47,7 @@ export class DialogsList extends React.Component {
       let messages = json.response.items.map(el => el.message);
       this.setState({ dialogs: messages });
     })
-    .catch(e => {
+      .catch(e => {
         console.warn(e);// todo alert
         debugger;
       });
@@ -65,10 +65,11 @@ export class DialogsList extends React.Component {
 
     //   }
     // )
+    debugger;
     const dialogsCopmponents = this.state.dialogs.map((val, id) => (
       <Button
         key={id}//{val.user_id? val.user_id:""}// 2000000000 +
-        title={val.body ? val.body : ''} //
+        title={val.title ? val.title : "[lastMsg:] " + (val.body ? val.body : '...')} //
         onPress={() => this.props.navigation.navigate('_Dialog', { ...val })}//users_count && null>1
       />
     ));
@@ -83,7 +84,7 @@ export class DialogsList extends React.Component {
 const styles = StyleSheet.create({
   FlexStyle: {
     flex: 1,
-    alignSelf: 'stretch'
+    //alignSelf: 'stretch'
   },
   Main: {
     flex: 1,
